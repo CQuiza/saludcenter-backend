@@ -24,19 +24,19 @@ from app.services.datetime_utils import number_to_spanish_years_text
 # --- Coordenadas (origen abajo-izquierda, puntos PDF). Plantilla ~842.5 x 595.5 (horizontal). ---
 # Ajustar midiendo contra app/templates/certificate_reference.pdf
 _LAYOUT = {
-    "student_name_y": 315.82,
-    "identity_y": 292.20,
-    "course_line_y": 268.58,
-    "cert_name_y": 250.23,
+    "student_name_y": 375.82,
+    "identity_y": 352.20,
+    "course_line_y": 323.58,
+    "cert_name_y": 305.23,
     "cert_max_width": 720.0,
-    "hours_y": 185.60,
-    "legal_top_y": 180.0,
+    "hours_y": 240.60,
+    "legal_top_y": 225.0,
     "legal_max_width": 720.0,
     "legal_margin_x": 61.0,
     "qr_from_right": 64.0,
-    "qr_from_bottom": 80.0,
+    "qr_from_bottom": 100.0,
     "qr_max_side": 100.0,
-    "validated_y": 60.0,
+    "validated_y": 50.0,
 }
 
 _MESES_ES = (
@@ -285,8 +285,8 @@ class CertificateEditor:
         buf = BytesIO()
         c = rl_canvas.Canvas(buf, pagesize=(w_pt, h_pt))
         cx = w_pt / 2.0
-        lightblue = HexColor("#36A9E1")
-        navy = HexColor("#000066")
+        lightblue = HexColor("#0071A2")
+        navy = HexColor("#1A255B")
         black = HexColor("#000000")
 
         kind_es = _CERT_KIND_ES.get(
@@ -323,7 +323,7 @@ class CertificateEditor:
             fontName=f_tahoma_bold,
             fontSize=17,
             leading=20.4,
-            textColor=navy,
+            textColor=lightblue,
             alignment=TA_CENTER,
             wordWrap="CJK",
         )
