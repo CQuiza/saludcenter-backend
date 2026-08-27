@@ -14,12 +14,23 @@ def credentials_body(app_name: str, email_to: str, password: str, login_url: str
 </html>"""
 
 
-def issued_body(app_name: str, student_name: str, verify_link: str) -> str:
+def issued_body(
+    app_name: str,
+    student_name: str,
+    verify_link: str,
+    certificate_type_name: str | None = None,
+) -> str:
+    cert_line = (
+        f'<p><strong>Certificado:</strong> {certificate_type_name}</p>'
+        if certificate_type_name
+        else ""
+    )
     return f"""<html>
 <body style="font-family: Arial, sans-serif; padding: 20px;">
     <h2>Certificado Emitido</h2>
     <p>Hola <strong>{student_name}</strong>,</p>
     <p>Te informamos que tu certificado ha sido emitido exitosamente.</p>
+    {cert_line}
     <p>Puedes verificar y descargar tu certificado en el siguiente enlace:</p>
     <p><a href="{verify_link}">{verify_link}</a></p>
     <p>Si tienes alguna duda, por favor contacta al administrador.</p>
@@ -42,12 +53,22 @@ def contact_body(name: str, email: str, program: str, message: str) -> str:
 </html>"""
 
 
-def expired_body(app_name: str, student_name: str) -> str:
+def expired_body(
+    app_name: str,
+    student_name: str,
+    certificate_type_name: str | None = None,
+) -> str:
+    cert_line = (
+        f'<p><strong>Certificado:</strong> {certificate_type_name}</p>'
+        if certificate_type_name
+        else ""
+    )
     return f"""<html>
 <body style="font-family: Arial, sans-serif; padding: 20px;">
     <h2>Certificado Expirado</h2>
     <p>Hola <strong>{student_name}</strong>,</p>
     <p>Te informamos que tu certificado ha expirado.</p>
+    {cert_line}
     <p>Si deseas obtener un nuevo certificado, por favor contacta al administrador.</p>
 </body>
 </html>"""

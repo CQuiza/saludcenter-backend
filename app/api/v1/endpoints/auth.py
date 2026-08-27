@@ -36,7 +36,16 @@ async def login(
     db: Annotated[AsyncSession, Depends(get_db)],
     form: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
-    user = await user_service.authenticate(db, form.username, form.password)
+    try:
+        user = await user_service.authenticate(db, form.username, form.password)
+    except PermissionError as e:
+        # Cuenta bloqueada por intentos fallidos: se informa al usuario
+        await db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from e
     if not user:
         await db.commit()
         raise HTTPException(

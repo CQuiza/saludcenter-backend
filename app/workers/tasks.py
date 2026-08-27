@@ -51,7 +51,8 @@ async def _async_check_expired_certificates():
         )
 
         stmt = select(Certificate).options(
-            selectinload(Certificate.user)
+            selectinload(Certificate.user),
+            selectinload(Certificate.certificate_type),
         ).where(
             Certificate.status == CertificateStatus.active.value,
             Certificate.expires_at <= now
@@ -107,6 +108,9 @@ async def _async_check_expired_certificates():
                         email_to=student_user.email,
                         student_name=student_user.name or "Estudiante",
                         certificate_uid=uid_str,
+                        certificate_type_name=(
+                            cert.certificate_type.name if cert.certificate_type else None
+                        ),
                     )
                     email_audit.status = EmailStatus.sent.value
                     email_audit.sent_at = func.now()
