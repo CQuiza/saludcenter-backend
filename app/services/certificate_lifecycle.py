@@ -257,6 +257,7 @@ class CertificateLifecycleService:
 
         cert.issued_at = issued_at
         cert.expires_at = expires_at
+        cert.status = CertificateStatus.active.value
         if hours is not None:
             cert.hours = hours
         if validity_extension is not None:
