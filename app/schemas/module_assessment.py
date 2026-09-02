@@ -85,6 +85,8 @@ class AnswerResult(BaseModel):
     selected_option_id: int
     is_correct: bool
     correct_option_id: int | None = None
+    selected_option_text: str | None = None
+    correct_option_text: str | None = None
 
 
 class AttemptResult(BaseModel):

@@ -229,18 +229,31 @@ async def get_assessment_attempts(
     attempts = await user_assessment_repository.get_attempts_by_assessment(
         db, assessment_id, current.id
     )
+    # assessment ya trae preguntas + opciones (get_by_id); resuelve textos aquí
+    options_by_question = {
+        q.id: q.options
+        for q in (assessment.questions if hasattr(assessment, "questions") else [])
+    }
     results = []
     for a in attempts:
-        answers = [
-            AnswerResult(
-                question_id=ans.question_id,
-                question_text=ans.question.question_text if ans.question else "",
-                selected_option_id=ans.selected_option_id,
-                is_correct=ans.is_correct,
-                correct_option_id=None,
+        answers = []
+        for ans in a.answers:
+            q_opts = options_by_question.get(ans.question_id, [])
+            selected_opt = next(
+                (o for o in q_opts if o.id == ans.selected_option_id), None
             )
-            for ans in a.answers
-        ]
+            correct_opt = next((o for o in q_opts if o.is_correct), None)
+            answers.append(
+                AnswerResult(
+                    question_id=ans.question_id,
+                    question_text=ans.question.question_text if ans.question else "",
+                    selected_option_id=ans.selected_option_id,
+                    is_correct=ans.is_correct,
+                    correct_option_id=correct_opt.id if correct_opt else None,
+                    selected_option_text=selected_opt.option_text if selected_opt else None,
+                    correct_option_text=correct_opt.option_text if correct_opt else None,
+                )
+            )
         total = sum(
             (q.points for q in (assessment.questions if hasattr(assessment, 'questions') else [])),
             0,

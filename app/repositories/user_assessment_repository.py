@@ -113,6 +113,8 @@ class UserAssessmentRepository:
                     selected_option_id=optid,
                     is_correct=is_correct,
                     correct_option_id=correct_opt.id if correct_opt else None,
+                    selected_option_text=option.option_text,
+                    correct_option_text=correct_opt.option_text if correct_opt else None,
                 )
             )
 
