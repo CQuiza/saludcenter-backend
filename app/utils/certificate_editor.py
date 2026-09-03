@@ -24,54 +24,54 @@ from app.services.datetime_utils import number_to_spanish_years_text
 # --- Coordenadas (origen abajo-izquierda, puntos PDF). Plantilla ~842.5 x 595.5 (horizontal). ---
 # Ajustar midiendo contra app/templates/certificate_reference.pdf
 _LAYOUT = {
-    "student_name_y": 375.82,
-    "identity_y": 352.20,
-    "course_line_y": 323.58,
-    "cert_name_y": 305.23,
-    "cert_max_width": 720.0,
-    "hours_y": 240.60,
-    "legal_top_y": 225.0,
+    "student_name_y": 405.82,
+    "identity_y": 382.20,
+    "course_line_y": 353.58,
+    "cert_name_y": 335.23,
+    "cert_max_width": 725.0,
+    "hours_y": 265.60,
+    "legal_top_y": 240.0,
     "legal_max_width": 720.0,
     "legal_margin_x": 61.0,
-    "qr_from_right": 64.0,
+    "qr_from_right": 130.0,
     "qr_from_bottom": 100.0,
-    "qr_max_side": 100.0,
-    "validated_y": 50.0,
+    "qr_max_side": 150.0,
+    "validated_y": 60.0,
 }
 
 _MESES_ES = (
-    "ENERO",
-    "FEBRERO",
-    "MARZO",
-    "ABRIL",
-    "MAYO",
-    "JUNIO",
-    "JULIO",
-    "AGOSTO",
-    "SEPTIEMBRE",
-    "OCTUBRE",
-    "NOVIEMBRE",
-    "DICIEMBRE",
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
 )
 
 _CERT_KIND_ES = {
-    "basic": "Básico",
-    "advanced": "Avanzado",
-    "diploma": "Diplomado",
+    "basic": "básico",
+    "advanced": "avanzado",
+    "diploma": "diplomado",
 }
 
 
 def _identity_phrase(identity_type: str, identity_number: str) -> str:
     t = (identity_type or "").upper().strip()
     _MAP = {
-        "CC": "CÉDULA DE CIUDADANÍA",
-        "TI": "TARJETA DE IDENTIDAD",
-        "CE": "CÉDULA DE EXTRANJERÍA",
-        "PPT": "PPT",
-        "PASSPORT": "PASAPORTE",
+        "CC": "cédula de ciudadanía",
+        "TI": "tarjeta de identidad",
+        "CE": "cédula de extranjería",
+        "PPT": "pasaporte",
+        "PASSPORT": "pasaporte",
     }
-    kind = _MAP.get(t, "DOCUMENTO DE IDENTIDAD")
-    return f"IDENTIFICADO CON {kind} No. {identity_number}"
+    kind = _MAP.get(t, "documento de identidad")
+    return f"Identificado con {kind} N°. {identity_number}"
 
 
 def _legal_paragraph_text(issued_on: date) -> str:
@@ -79,10 +79,10 @@ def _legal_paragraph_text(issued_on: date) -> str:
     month = _MESES_ES[issued_on.month - 1]
     year = issued_on.year
     return (
-        f"ESTE CERTIFICADO ES EXPEDIDO EN LA CIUDAD DE NEIVA A LOS {day} DÍAS "
-        f"DEL MES DE {month} DEL {year}, LA PRESENTE CERTIFICACIÓN SE EXPIDE MEDIANTE "
-        "EL MARCO NORMATIVO PARA LA EDUCACIÓN INFORMAL Y NO CONDUCE A TITULO ALGUNO O "
-        "CERTIFICACIÓN DE APTITUD OCUPACIONAL."
+        f"Este certificado es expedido en la ciudad de Neiva a los {day} días "
+        f"del mes de {month} del {year} y se expide mediante "
+        "el marco normativo para la educación informal y no conduce a titulo alguno o "
+        "certificación de aptitud ocupacional."
     )
 
 
@@ -285,26 +285,26 @@ class CertificateEditor:
         buf = BytesIO()
         c = rl_canvas.Canvas(buf, pagesize=(w_pt, h_pt))
         cx = w_pt / 2.0
-        lightblue = HexColor("#0071A2")
-        navy = HexColor("#1A255B")
+        lightblue = HexColor("#91BAFF")
+        navy = HexColor("#0C58A6")
         black = HexColor("#000000")
 
         kind_es = _CERT_KIND_ES.get(
             (data.certificate_type_kind or "").lower(),
             data.certificate_type_kind or "",
         )
-        course_line = f"Asistió al curso {kind_es}:"
+        course_line = f"Aprobó el curso {kind_es} en:"
 
         # Nombre estudiante
-        c.setFont(f_treb_bold, 25.5)
-        c.setFillColor(lightblue)
+        c.setFont(f_treb, 26.5)
+        c.setFillColor(navy)
         c.drawCentredString(
             cx, _LAYOUT["student_name_y"], (data.student_full_name)
         )
 
         # Identidad
-        c.setFont(f_tahoma, 17)
-        c.setFillColor(navy)
+        c.setFont(f_tahoma, 15)
+        c.setFillColor(black)
         c.drawCentredString(
             cx,
             _LAYOUT["identity_y"],
@@ -320,10 +320,10 @@ class CertificateEditor:
         cert_name = html.escape(data.certificate_type_name.upper())
         cert_style = ParagraphStyle(
             name="cert_name",
-            fontName=f_tahoma_bold,
-            fontSize=17,
-            leading=20.4,
-            textColor=lightblue,
+            fontName=f_tahoma,
+            fontSize=20,
+            leading=22.4,
+            textColor=black,
             alignment=TA_CENTER,
             wordWrap="CJK",
         )
@@ -334,8 +334,8 @@ class CertificateEditor:
         cert_para.drawOn(c, x_para, mid - ch / 2.0)
 
         # Horas
-        c.setFont(f_cambria, 17)
-        c.setFillColor(navy)
+        c.setFont(f_cambria, 18)
+        c.setFillColor(black)
         c.drawCentredString(
             cx,
             _LAYOUT["hours_y"],
@@ -347,9 +347,9 @@ class CertificateEditor:
         style = ParagraphStyle(
             name="legal",
             fontName=f_tahoma,
-            fontSize=8.0,
-            leading=8.0,
-            textColor=navy,
+            fontSize=12.0,
+            leading=12.0,
+            textColor=black,
             alignment=TA_CENTER,
         )
         para = Paragraph(legal.replace("\n", "<br/>"), style)
@@ -370,12 +370,12 @@ class CertificateEditor:
 
         # Vigencia
         if data.validity_years is not None:
-            c.setFont(f_tahoma_bold, 9)
+            c.setFont(f_tahoma_bold, 11)
             c.setFillColor(black)
             text = (
-                f"ESTADO DE VIGENCIA: "
-                f"VENCE EN {number_to_spanish_years_text(data.validity_years)} "
-                f"DESDE SU FECHA DE EXPEDICIÓN"
+                f"Estado de vigencia: "
+                f"Vence en {number_to_spanish_years_text(data.validity_years)} "
+                f"desde su fecha de expedición"
             )
             c.drawCentredString(cx, _LAYOUT["validated_y"], text)
 

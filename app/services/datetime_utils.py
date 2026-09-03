@@ -4,11 +4,11 @@ from datetime import UTC, datetime, timedelta
 
 
 def number_to_spanish_years_text(years: int) -> str:
-    _UNITS = ["", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"]
-    _TENS = ["", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA",
-             "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"]
-    _TEENS = ["DIEZ", "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE",
-              "DIECISÉIS", "DIECISIETE", "DIECIOCHO", "DIECINUEVE"]
+    _UNITS = ["", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"]
+    _TENS = ["", "diez", "veinte", "treinta", "cuarenta", "cincuenta",
+             "sesenta", "setenta", "ochenta", "noventa"]
+    _TEENS = ["diez", "once", "doce", "trece", "catorce", "quince",
+              "dieciséis", "diecisiete", "dieciocho", "diecinueve"]
 
     if years == 0:
         word = "CERO"
@@ -26,7 +26,7 @@ def number_to_spanish_years_text(years: int) -> str:
     else:
         word = str(years)
 
-    plural = "AÑO" if years == 1 else "AÑOS"
+    plural = "año" if years == 1 else "años"
     return f"{word} ({years}) {plural}"
 
 
