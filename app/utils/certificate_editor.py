@@ -67,7 +67,7 @@ def _identity_phrase(identity_type: str, identity_number: str) -> str:
         "CC": "cédula de ciudadanía",
         "TI": "tarjeta de identidad",
         "CE": "cédula de extranjería",
-        "PPT": "pasaporte",
+        "PPT": "PPT",
         "PASSPORT": "pasaporte",
     }
     kind = _MAP.get(t, "documento de identidad")
