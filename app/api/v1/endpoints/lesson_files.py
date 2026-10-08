@@ -1,6 +1,7 @@
 """Archivos de lecciones."""
 
 import asyncio
+import unicodedata
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
@@ -24,6 +25,7 @@ from app.services.access import (
     teacher_owns_module,
 )
 from app.utils.helpers import validate_file_extension
+from app.utils.http_headers import build_content_disposition
 from app.utils.minio_client import get_minio_client
 
 router = APIRouter(prefix="/lessons", tags=["lesson_files"])
@@ -110,7 +112,7 @@ async def upload_lesson_file(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"El archivo supera el límite de {settings.lesson_file_max_upload_size_mb} MB",
         )
-    original_filename = file.filename or f"lesson-file-{file_id}"
+    original_filename = unicodedata.normalize("NFC", file.filename or f"lesson-file-{file_id}")
     ext = validate_file_extension(original_filename)
     object_name = f"{settings.minio_path_lesson_files}/{lesson_id}/{file_id}.{ext}"
 
@@ -195,7 +197,7 @@ async def download_lesson_file(
         content=data,
         media_type=lf.mime_type or "application/octet-stream",
         headers={
-            "Content-Disposition": f'{disposition}; filename="{filename}"',
+            "Content-Disposition": build_content_disposition(filename, disposition),
         },
     )
 

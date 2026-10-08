@@ -2,6 +2,7 @@
 
 import asyncio
 import mimetypes
+import unicodedata
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
@@ -30,6 +31,7 @@ from app.services.access import (
     teacher_owns_module,
 )
 from app.utils.helpers import validate_file_extension
+from app.utils.http_headers import build_content_disposition
 from app.utils.minio_client import get_minio_client
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -159,7 +161,7 @@ async def upload_task_file(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"El archivo supera el límite de {settings.task_max_upload_size_mb} MB",
         )
-    original_filename = file.filename or f"task-{task_id}"
+    original_filename = unicodedata.normalize("NFC", file.filename or f"task-{task_id}")
     ext = validate_file_extension(original_filename)
     object_name = f"{settings.minio_path_tasks}/{task_id}/{task_id}.{ext}"
 
@@ -241,6 +243,6 @@ async def download_task_file(
         content=data,
         media_type=mime_type or "application/octet-stream",
         headers={
-            "Content-Disposition": f'{disposition}; filename="{filename}"',
+            "Content-Disposition": build_content_disposition(filename, disposition),
         },
     )

@@ -2,7 +2,7 @@
 
 import asyncio
 import re
-import urllib.parse
+import unicodedata
 from pathlib import Path
 from typing import Annotated
 
@@ -33,6 +33,7 @@ from app.services.access import (
     is_teacher,
     require_course_visible,
 )
+from app.utils.http_headers import build_content_disposition
 from app.utils.minio_client import get_minio_client
 
 router = APIRouter(tags=["task-submissions"])
@@ -120,7 +121,9 @@ async def submit_task(
         )
 
     sanitized_title = re.sub(r"[^\w\s]", "", task.title).strip().replace(" ", "_")
-    original_filename = f"{current.identity_number}_{sanitized_title}.pdf"
+    original_filename = unicodedata.normalize(
+        "NFC", f"{current.identity_number}_{sanitized_title}.pdf"
+    )
     object_name = f"{settings.minio_path_task_submissions}/{task_id}/{current.id}.pdf"
 
     try:
@@ -251,11 +254,10 @@ async def download_submission_file(
             detail=str(e),
         )
 
-    safe_filename = urllib.parse.quote(sub.original_filename)
     return Response(
         content=data,
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f'attachment; filename="{sub.original_filename}"; filename*=UTF-8\'\'{safe_filename}',
+            "Content-Disposition": build_content_disposition(sub.original_filename, "attachment"),
         },
     )
