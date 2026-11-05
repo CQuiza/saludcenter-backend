@@ -119,6 +119,7 @@ class ModuleProgressItem(BaseModel):
     attempts_count: int
     last_score: float | None
     passed: bool
+    completed: bool = False
     total_tasks: int = 0
     submitted_tasks: int = 0
     tasks: list[TaskProgressItem] = []

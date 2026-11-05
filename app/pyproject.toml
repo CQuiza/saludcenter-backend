@@ -24,6 +24,7 @@ dependencies = [
     "amqp>=5.3.1",
     "fastapi-mail>=1.6.4",
     "pytest>=9.0.3",
+    "aiosqlite>=0.20.0",
     "anyio>=4.13.0",
     "slowapi>=0.1.9",
 ]

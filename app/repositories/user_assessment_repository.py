@@ -29,6 +29,24 @@ from app.schemas.module_assessment import (
 )
 
 
+def _is_module_completed(
+    *,
+    has_assessment: bool,
+    passed: bool,
+    total_tasks: int,
+    submitted_tasks: int,
+) -> bool:
+    """Un módulo está completo si cumple todos los requisitos que tenga.
+
+    Los módulos sin evaluación o sin tareas no bloquean el avance: solo
+    cuentan como pendientes las evaluaciones existentes no aprobadas y las
+    tareas existentes sin entregar.
+    """
+    assessment_ok = not has_assessment or passed
+    tasks_ok = total_tasks == 0 or submitted_tasks == total_tasks
+    return assessment_ok and tasks_ok
+
+
 class UserAssessmentRepository:
     async def create_attempt(
         self,
@@ -219,7 +237,7 @@ class UserAssessmentRepository:
                     UserAssessmentAttempt.assessment_id.in_(assessment_ids),
                     UserAssessmentAttempt.user_id == user_id,
                 )
-                .order_by(UserAssessmentAttempt.finished_at.desc().nullslast())
+                .order_by(UserAssessmentAttempt.finished_at.desc().nulls_last())
             )
             for a in a_r.scalars().all():
                 attempts_map.setdefault(a.assessment_id, []).append(a)
@@ -235,10 +253,16 @@ class UserAssessmentRepository:
             last_score = float(attempts[0].score) if attempts else None
             passed = any(a.passed for a in attempts)
 
-            if passed:
-                completed += 1
-
             tp = task_progress_map.get(mod.id, {"total_tasks": 0, "submitted_tasks": 0, "tasks": []})
+
+            module_completed = _is_module_completed(
+                has_assessment=assessment is not None,
+                passed=passed,
+                total_tasks=tp["total_tasks"],
+                submitted_tasks=tp["submitted_tasks"],
+            )
+            if module_completed:
+                completed += 1
 
             module_items.append(
                 ModuleProgressItem(
@@ -249,6 +273,7 @@ class UserAssessmentRepository:
                     attempts_count=attempts_count,
                     last_score=last_score,
                     passed=passed,
+                    completed=module_completed,
                     total_tasks=tp["total_tasks"],
                     submitted_tasks=tp["submitted_tasks"],
                     tasks=[TaskProgressItem(**t) for t in tp["tasks"]],
@@ -316,7 +341,7 @@ class UserAssessmentRepository:
                     UserAssessmentAttempt.assessment_id.in_(all_assessment_ids),
                     UserAssessmentAttempt.user_id == user_id,
                 )
-                .order_by(UserAssessmentAttempt.finished_at.desc())
+                .order_by(UserAssessmentAttempt.finished_at.desc().nulls_last())
             )
             for a in a_r.scalars().all():
                 attempts_map.setdefault(a.assessment_id, []).append(a)
@@ -335,10 +360,16 @@ class UserAssessmentRepository:
                 last_score = float(attempts[0].score) if attempts else None
                 passed = any(a.passed for a in attempts)
 
-                if passed:
-                    completed += 1
-
                 tp = task_progress_map.get(mod.id, {"total_tasks": 0, "submitted_tasks": 0, "tasks": []})
+
+                module_completed = _is_module_completed(
+                    has_assessment=assessment is not None,
+                    passed=passed,
+                    total_tasks=tp["total_tasks"],
+                    submitted_tasks=tp["submitted_tasks"],
+                )
+                if module_completed:
+                    completed += 1
 
                 module_items.append(
                     ModuleProgressItem(
@@ -349,6 +380,7 @@ class UserAssessmentRepository:
                         attempts_count=attempts_count,
                         last_score=last_score,
                         passed=passed,
+                        completed=module_completed,
                         total_tasks=tp["total_tasks"],
                         submitted_tasks=tp["submitted_tasks"],
                         tasks=[TaskProgressItem(**t) for t in tp["tasks"]],
